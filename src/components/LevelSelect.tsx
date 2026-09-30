@@ -1,5 +1,6 @@
 // LevelSelect.tsx — the world map. Levels unlock as you earn stars.
 
+import { useState } from 'react';
 import { LEVELS } from '../data/levels';
 import { WORLDS } from '../data/worlds';
 import { Progress, totalStars } from '../state/useProgress';
@@ -10,9 +11,13 @@ interface Props {
   progress: Progress;
   onPlay: (levelId: string) => void;
   onChangeCritter: () => void;
+  /** Wipe all saved progress so a new student can start fresh. */
+  onStartOver: () => void;
 }
 
-export function LevelSelect({ progress, onPlay, onChangeCritter }: Props) {
+export function LevelSelect({ progress, onPlay, onChangeCritter, onStartOver }: Props) {
+  const [confirming, setConfirming] = useState(false);
+
   // A level unlocks when the previous one (in order) has at least one star.
   const unlocked = new Set<string>();
   LEVELS.forEach((lvl, i) => {
@@ -61,6 +66,26 @@ export function LevelSelect({ progress, onPlay, onChangeCritter }: Props) {
           </div>
         </section>
       ))}
+
+      <footer className="start-over">
+        {confirming ? (
+          <div className="start-over-confirm" role="alertdialog" aria-label="Start over?">
+            <p>This erases all stars and your critter so a new player can start fresh. Are you sure?</p>
+            <div className="start-over-actions">
+              <button className="btn btn-danger" onClick={onStartOver}>
+                Yes, start over
+              </button>
+              <button className="btn btn-back" onClick={() => setConfirming(false)} autoFocus>
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button className="btn btn-back" onClick={() => setConfirming(true)}>
+            New player? Start over
+          </button>
+        )}
+      </footer>
     </div>
   );
 }

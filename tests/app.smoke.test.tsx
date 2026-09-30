@@ -37,4 +37,30 @@ describe('App end-to-end flow', () => {
     expect(within(result).getByText(/Perfect|did it|Great job/i)).toBeTruthy();
     expect(screen.getByRole('button', { name: /Next level/i })).toBeTruthy();
   });
+
+  it('lets a new player start over, wiping saved progress', async () => {
+    localStorage.setItem(
+      'code-critters-progress-v1',
+      JSON.stringify({ character: 'pip', prize: 'bone', stars: { 'w1-l1': 3 }, onboarded: true }),
+    );
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Returning player lands on the map with their stars.
+    expect(screen.getByText('Level Map')).toBeTruthy();
+    expect(screen.getByLabelText('3 stars earned')).toBeTruthy();
+
+    // Cancel keeps everything.
+    await user.click(screen.getByRole('button', { name: /Start over/i }));
+    await user.click(screen.getByRole('button', { name: /Cancel/i }));
+    expect(screen.getByLabelText('3 stars earned')).toBeTruthy();
+
+    // Confirming wipes progress and returns to the character picker.
+    await user.click(screen.getByRole('button', { name: /Start over/i }));
+    await user.click(screen.getByRole('button', { name: /Yes, start over/i }));
+    expect(screen.getByText('Code Critters')).toBeTruthy();
+    const saved = JSON.parse(localStorage.getItem('code-critters-progress-v1')!);
+    expect(saved.stars).toEqual({});
+    expect(saved.onboarded).toBe(false);
+  });
 });

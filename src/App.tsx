@@ -16,7 +16,7 @@ type Screen =
   | { name: 'play'; levelId: string };
 
 export default function App() {
-  const { progress, setCharacter, setPrize, setOnboarded, recordStars } = useProgress();
+  const { progress, setCharacter, setPrize, setOnboarded, recordStars, resetAll } = useProgress();
   const [screen, setScreen] = useState<Screen>(() =>
     progress.onboarded ? { name: 'map' } : { name: 'picker' },
   );
@@ -60,6 +60,10 @@ export default function App() {
           progress={progress}
           onPlay={openLevel}
           onChangeCritter={() => setScreen({ name: 'picker' })}
+          onStartOver={() => {
+            resetAll();
+            setScreen({ name: 'picker' });
+          }}
         />
       );
 
